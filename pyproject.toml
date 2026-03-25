@@ -1,0 +1,9 @@
+[project]
+name = "dicom-id-restamp"
+version = "0.1.0"
+description = "Batch-edits DICOM metadata (Accession Number + Patient ID) and writes the modified copies to a new directory."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pydicom>=3.0.2",
+]
