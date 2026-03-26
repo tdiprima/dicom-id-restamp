@@ -1,32 +1,26 @@
+#!/usr/bin/env python3
 """
-restamp - Re-stamp Accession Number and Patient ID in DICOM files.
+oops - Re-stamp Accession Number and Patient ID in DICOM files.
 
 Usage:
-    restamp <STR> <src_folder> <dest_folder>
+    oops --pid <patient_id> --acc <accession> <src_folder> <dest_folder>
 
 For every DICOM file found in <src_folder>:
-  - Sets Accession Number to  A<STR>
-  - Sets Patient ID        to  P<STR>
+  - Sets Patient ID        to the given value
+  - Sets Accession Number  to the given value
   - Writes the modified file into <dest_folder> (preserving the filename).
 
 The destination folder is created automatically if it does not exist.
+
+Examples:
+    oops --pid patient1 --acc acc1 /data2/patient1 /data2/dest/patient1
+    oops --pid patient3 --acc acc3 /data2/patient3 /data2/dest/patient3
 """
 
-import os
 import sys
-from pathlib import Path
-
+import os
+import argparse
 import pydicom
-
-
-def usage():
-    print("Usage: restamp <STR> <src_folder> <dest_folder>")
-    print()
-    print("  STR         Identifier string. Accession Number becomes ASTR,")
-    print("              Patient ID becomes PSTR.")
-    print("  src_folder  Folder containing the source DICOM files.")
-    print("  dest_folder Folder where modified DICOM files will be written.")
-    sys.exit(1)
 
 
 def is_dicom(filepath):
@@ -46,7 +40,6 @@ def process_file(src_path, dest_path, accession, patient_id):
         print(f"  WARNING: Could not read {src_path}: {e}")
         return False
 
-    # Update the two tags
     ds.AccessionNumber = accession
     ds.PatientID = patient_id
 
@@ -60,15 +53,21 @@ def process_file(src_path, dest_path, accession, patient_id):
 
 
 def main():
-    if len(sys.argv) != 4:
-        usage()
+    parser = argparse.ArgumentParser(
+        prog="oops",
+        description="Re-stamp Accession Number and Patient ID in DICOM files.",
+    )
+    parser.add_argument("--pid", required=True, help="Patient ID to set")
+    parser.add_argument("--acc", required=True, help="Accession Number to set")
+    parser.add_argument("src", help="Source folder containing DICOM files")
+    parser.add_argument("dest", help="Destination folder for modified files")
 
-    str_id = sys.argv[1]
-    src_folder = sys.argv[2]
-    dest_folder = sys.argv[3]
+    args = parser.parse_args()
 
-    accession = f"A{str_id}"
-    patient_id = f"P{str_id}"
+    accession = args.acc
+    patient_id = args.pid
+    src_folder = args.src
+    dest_folder = args.dest
 
     # Validate source folder
     if not os.path.isdir(src_folder):
@@ -76,10 +75,10 @@ def main():
         sys.exit(1)
 
     # Create destination folder if needed
-    Path(dest_folder).mkdir(parents=True, exist_ok=True)
+    os.makedirs(dest_folder, exist_ok=True)
 
-    print(f"Accession Number : {accession}")
     print(f"Patient ID       : {patient_id}")
+    print(f"Accession Number : {accession}")
     print(f"Source           : {src_folder}")
     print(f"Destination      : {dest_folder}")
     print()
@@ -90,11 +89,9 @@ def main():
     for filename in sorted(os.listdir(src_folder)):
         src_path = os.path.join(src_folder, filename)
 
-        # Skip directories
         if not os.path.isfile(src_path):
             continue
 
-        # Check if it's a DICOM file
         if not is_dicom(src_path):
             print(f"  Skipping (not DICOM): {filename}")
             skipped += 1
