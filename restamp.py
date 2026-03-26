@@ -20,6 +20,7 @@ Examples:
 import argparse
 import os
 import sys
+from pathlib import Path
 
 import pydicom
 
@@ -76,7 +77,7 @@ def main():
         sys.exit(1)
 
     # Create destination folder if needed
-    os.makedirs(dest_folder, exist_ok=True)
+    Path(dest_folder).mkdir(parents=True, exist_ok=True)
 
     print(f"Patient ID       : {patient_id}")
     print(f"Accession Number : {accession}")
