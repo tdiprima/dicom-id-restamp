@@ -1,5 +1,7 @@
 # dicom-id-restamp
 
+DICOM metadata batch edit
+
 Batch-rewrite Accession Number and Patient ID in DICOM files without touching pixel data.
 
 ## When DICOM Identifiers Need a Fresh Start

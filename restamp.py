@@ -17,9 +17,10 @@ Examples:
     oops --pid patient3 --acc acc3 /data2/patient3 /data2/dest/patient3
 """
 
-import sys
-import os
 import argparse
+import os
+import sys
+
 import pydicom
 
 
